@@ -48,6 +48,7 @@ layout = [
     [sg.Text("", key="updateEvent")]
 ]
 
+
 janela = sg.Window('Sender', layout)
 
 while True:
