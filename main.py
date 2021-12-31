@@ -29,7 +29,7 @@ def make_zipfile(output_filename, source_dir):
 
 sg.theme("DarkAmber")
 cfg = configparser.ConfigParser()
-cfg.read('config.ini')
+
 iniServer = cfg.get('ssh_config', 'server')
 iniUser = cfg.get('ssh_config', 'usuario')
 iniPassword = cfg.get('ssh_config', 'senha')
