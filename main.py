@@ -49,6 +49,7 @@ layout = [
 ]
 
 
+
 janela = sg.Window('Sender', layout)
 
 while True:
