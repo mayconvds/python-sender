@@ -44,7 +44,7 @@ layout = [
     [sg.Text('Nome do Projeto', size=(15, 1)), sg.Input(key='nome_do_projeto', default_text=iniProjectName, size=(20, 1))],
     [sg.Text('Diretório', size=(15, 1)), sg.Input(key='diretoriossh', default_text=iniDirectorySsh, size=(20, 1))],
     [sg.In(iniDiretorioDoProjeto), sg.FolderBrowse(key="files", initial_folder=iniDiretorioDoProjeto)],
-    [sg.Button("Entrar")],
+    [sg.Button("Enviar")],
     [sg.Text("", key="updateEvent")]
 ]
 
