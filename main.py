@@ -1,12 +1,9 @@
 from PySimpleGUI import PySimpleGUI as sg
-from webbrowser import open
 import zipfile
 import os
-import shutil
 import paramiko
 from scp import SCPClient
 import configparser
-
 
 def make_zipfile(output_filename, source_dir):
     try:
@@ -29,26 +26,35 @@ def make_zipfile(output_filename, source_dir):
 
 sg.theme("DarkAmber")
 cfg = configparser.ConfigParser()
+can = cfg.read('config/config.ini')
+iniServer = ""
+iniUser = ""
+iniPassword = ""
+iniDirectorySsh = ""
+iniProjectName = ""
+iniDiretorioDoProjeto = ""
+if can:
+    iniServer = cfg.get('ssh_config', 'server')
+    iniUser = cfg.get('ssh_config', 'usuario')
+    iniPassword = cfg.get('ssh_config', 'senha')
+    iniDirectorySsh = cfg.get('ssh_config', 'diretorio_ssh')
+    iniProjectName = cfg.get('ssh_config', 'nome_do_projeto')
+    iniDiretorioDoProjeto = cfg.get('ssh_config', 'diretorio_do_projeto')
+else:
+    sg.PopupError("Atenção! Criar o diretório config/config.ini.")
 
-iniServer = cfg.get('ssh_config', 'server')
-iniUser = cfg.get('ssh_config', 'usuario')
-iniPassword = cfg.get('ssh_config', 'senha')
-iniDirectorySsh = cfg.get('ssh_config', 'diretorio_ssh')
-iniProjectName = cfg.get('ssh_config', 'nome_do_projeto')
-iniDiretorioDoProjeto = cfg.get('ssh_config', 'diretorio_do_projeto')
 
 layout = [
     [sg.Text('Servidor', size=(15, 1)), sg.Input(key='servidor', default_text=iniServer, size=(20, 1))],
-    [sg.Text('Usuario', size=(15, 1)), sg.Input(key='usuario',default_text=iniUser, size=(20, 1))],
+    [sg.Text('Usuario', size=(15, 1)), sg.Input(key='usuario', default_text=iniUser, size=(20, 1))],
     [sg.Text('Senha', size=(15, 1)), sg.Input(key='senha', password_char='*', default_text=iniPassword, size=(20, 1))],
-    [sg.Text('Nome do Projeto', size=(15, 1)), sg.Input(key='nome_do_projeto', default_text=iniProjectName, size=(20, 1))],
+    [sg.Text('Nome do Projeto', size=(15, 1)),
+     sg.Input(key='nome_do_projeto', default_text=iniProjectName, size=(20, 1))],
     [sg.Text('Diretório', size=(15, 1)), sg.Input(key='diretoriossh', default_text=iniDirectorySsh, size=(20, 1))],
     [sg.In(iniDiretorioDoProjeto), sg.FolderBrowse(key="files", initial_folder=iniDiretorioDoProjeto)],
     [sg.Button("Enviar")],
     [sg.Text("", key="updateEvent")]
 ]
-
-
 
 janela = sg.Window('Sender', layout)
 
@@ -56,7 +62,7 @@ while True:
     eventos, valores = janela.read()
     if eventos == sg.WINDOW_CLOSED:
         break
-    if eventos == 'Entrar':
+    if eventos == 'Enviar':
         directoryProject = valores["files"]
         if valores["files"] == "" and iniDiretorioDoProjeto is not None:
             directoryProject = iniDiretorioDoProjeto
@@ -79,6 +85,3 @@ while True:
             ssh.exec_command('mv ' + directorySsh + '/' + projectName + '/* ' + directorySsh)
             ssh.exec_command('rm ' + directorySsh + '/' + fileName)
             ssh.exec_command('rm -r ' + directorySsh + '/' + projectName)
-
-
-
