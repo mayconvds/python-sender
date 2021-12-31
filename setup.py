@@ -15,5 +15,10 @@ setup(
     version="0.1",
     description="Sender xDxD",
     options={"build_exe": build_exe_options},
-    executables=[Executable("main.py", base=base)]
+    executables=[Executable("main.py",
+                            copyright="Copyright (C) 2021 Sender",
+                            base=base,
+                            icon="4990671.ico",
+                            shortcutName="Sender"
+                            )]
 )
