@@ -1,0 +1,6 @@
+build
+venv
+project.zip
+.idea
+config
+config/config.ini
