@@ -50,20 +50,50 @@ else:
 directoryProject = iniDiretorioDoProjeto
 
 fileName = "project.zip"
+
 projectName = iniProjectName
+print("zipando arquivo")
 make_zipfile(fileName, directoryProject)
+print("arquivo zipado")
 address = iniServer
 username = iniUser
 password = iniPassword
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(hostname=address, username=username, password=password)
-directorySsh = iniDirectorySsh
 cwd = os.getcwd()
-stdin, stdout, stderr = ssh.exec_command('rm -r ' + directorySsh + '/*')
+
+if not os.path.isfile(cwd + "/" + fileName):
+    sg.PopupError("Arquivo " + fileName + " não existe.")
+    sys.exit(69)
+
+print("conectando")
+ssh.connect(hostname=address, username=username, password=password)
+print("conectado")
+directorySsh = iniDirectorySsh
+
+
 with SCPClient(ssh.get_transport()) as scp:
-    scp.put(cwd + "/" + fileName, directorySsh)
+    print("enviando arquivo " + fileName)
+    scp.put(cwd + "/" + fileName, directorySsh + "/..")
+    print("arquivo enviado")
+    ssh.exec_command('rm -r ' + directorySsh + '/*')
+    print("arquivos do diretório '" + directorySsh + "' excluído")
+    ssh.exec_command('mv ' + directorySsh + "/../" + fileName + ' ' + directorySsh)
+    print('aquivo ' + directorySsh + ' movido para ' + directorySsh)
+    print("unzip no arquivo " + fileName)
     ssh.exec_command('unzip ' + directorySsh + '/' + fileName + ' -d ' + directorySsh)
+    print("movendo arquivos do projeto '" + projectName + "' para '" + directorySsh + "'")
     ssh.exec_command('mv ' + directorySsh + '/' + projectName + '/* ' + directorySsh)
+    print("removendo arquivo " + fileName)
     ssh.exec_command('rm ' + directorySsh + '/' + fileName)
+    print("excluindo diretório " + projectName + " da pasta " + directorySsh)
     ssh.exec_command('rm -r ' + directorySsh + '/' + projectName)
+    scp.close()
+
+
+if os.path.isfile(cwd + "/" + fileName):
+    os.remove(cwd + "/" + fileName)
+    print("deletando arquivo " + fileName + " do diretório " + cwd)
+
+ssh.close()
+print("processo finalizado conexão encerrada")
