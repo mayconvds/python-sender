@@ -1,11 +1,14 @@
 import sys
-
 from PySimpleGUI import PySimpleGUI as sg
 import zipfile
 import os
 import paramiko
 from scp import SCPClient
 import configparser
+
+
+def progress(filename, size, sent):
+    print("%s progress: %.2f%%   \r" % (filename, float(sent)/float(size)*100) )
 
 
 def make_zipfile(output_filename, source_dir):
@@ -71,25 +74,23 @@ ssh.connect(hostname=address, username=username, password=password)
 print("conectado")
 directorySsh = iniDirectorySsh
 
-
-with SCPClient(ssh.get_transport()) as scp:
-    print("enviando arquivo " + fileName)
-    scp.put(cwd + "/" + fileName, directorySsh + "/..")
-    print("arquivo enviado")
-    ssh.exec_command('rm -r ' + directorySsh + '/*')
-    print("arquivos do diretório '" + directorySsh + "' excluído")
-    ssh.exec_command('mv ' + directorySsh + "/../" + fileName + ' ' + directorySsh)
-    print('aquivo ' + directorySsh + ' movido para ' + directorySsh)
-    print("unzip no arquivo " + fileName)
-    ssh.exec_command('unzip ' + directorySsh + '/' + fileName + ' -d ' + directorySsh)
-    print("movendo arquivos do projeto '" + projectName + "' para '" + directorySsh + "'")
-    ssh.exec_command('mv ' + directorySsh + '/' + projectName + '/* ' + directorySsh)
-    print("removendo arquivo " + fileName)
-    ssh.exec_command('rm ' + directorySsh + '/' + fileName)
-    print("excluindo diretório " + projectName + " da pasta " + directorySsh)
-    ssh.exec_command('rm -r ' + directorySsh + '/' + projectName)
-    scp.close()
-
+scp = SCPClient(ssh.get_transport(), progress=progress)
+print("enviando arquivo " + fileName)
+scp.put(cwd + "/" + fileName, directorySsh + "/..")
+print("arquivo enviado")
+ssh.exec_command('rm -r ' + directorySsh + '/*')
+print("arquivos do diretório '" + directorySsh + "' excluído")
+ssh.exec_command('mv ' + directorySsh + "/../" + fileName + ' ' + directorySsh)
+print('aquivo ' + directorySsh + ' movido para ' + directorySsh)
+print("unzip no arquivo " + fileName)
+ssh.exec_command('unzip ' + directorySsh + '/' + fileName + ' -d ' + directorySsh)
+print("movendo arquivos do projeto '" + projectName + "' para '" + directorySsh + "'")
+ssh.exec_command('mv ' + directorySsh + '/' + projectName + '/* ' + directorySsh)
+print("removendo arquivo " + fileName)
+ssh.exec_command('rm ' + directorySsh + '/' + fileName)
+print("excluindo diretório " + projectName + " da pasta " + directorySsh)
+ssh.exec_command('rm -r ' + directorySsh + '/' + projectName)
+scp.close()
 
 if os.path.isfile(cwd + "/" + fileName):
     os.remove(cwd + "/" + fileName)
